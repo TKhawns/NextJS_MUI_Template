@@ -8,7 +8,7 @@ import {
 	Link,
 } from "@mui/material";
 
-import { SignInSchema, SignInSchemaType } from "@/validations/app-schema";
+import { SignInSchema, SignInSchemaType } from "@/lib/validations/app-schema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
 	Box,
@@ -20,8 +20,8 @@ import {
 import { useActionState } from "react";
 import { useForm } from "react-hook-form";
 import { signIn } from "../actions/sign-in";
-import { CustomCard } from "../styles/custom-card";
-import { SignUpContainer } from "../styles/sign-in-container";
+import { CustomCard } from "./custom-card";
+import { SignUpContainer } from "./sign-in-container";
 
 export default function SignInForm() {
 	// Example of react-hook-form validate sign-in fields.

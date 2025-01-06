@@ -1,6 +1,6 @@
 "use server";
 
-import { CoffeeType } from "@/types";
+import { CoffeeType } from "@/lib/types";
 
 // Example API.
 export const getAllCoffeeList = async () => {

@@ -1,9 +1,9 @@
-import { CoffeeType } from "@/types";
+import { CoffeeType } from "@/lib/types";
 import { Typography } from "@mui/material";
 import { CardMedia } from "@mui/material";
 import { Button } from "@mui/material";
-import { StyledCard } from "../styles/coffee-card";
-import { StyledCardContent } from "../styles/coffee-content";
+import { StyledCard } from "./coffee-card";
+import { StyledCardContent } from "./coffee-content";
 
 function CoffeeItem({ coffee }: { coffee: CoffeeType }) {
 	return (
