@@ -8,6 +8,8 @@ import {
 	Link,
 } from "@mui/material";
 
+import { SignInSchema, SignInSchemaType } from "@/validations/app-schema";
+import { zodResolver } from "@hookform/resolvers/zod";
 import {
 	Box,
 	FormControl,
@@ -15,11 +17,39 @@ import {
 	TextField,
 	Typography,
 } from "@mui/material";
+import { useActionState } from "react";
+import { useForm } from "react-hook-form";
+import { signIn } from "../actions/sign-in";
 import { CustomCard } from "../styles/custom-card";
 import { SignUpContainer } from "../styles/sign-in-container";
 
-// Example form login.
 export default function SignInForm() {
+	// Example of react-hook-form validate sign-in fields.
+	const {
+		register,
+		formState: { errors, isValid },
+	} = useForm<SignInSchemaType>({
+		resolver: zodResolver(SignInSchema),
+		mode: "all",
+	});
+
+	const signInHandler = async (_previousState: string, formData: FormData) => {
+		try {
+			const data = {
+				email: formData.get("email") as string,
+				password: formData.get("password") as string,
+			};
+			const res = await signIn(data.email, data.password);
+			return res;
+		} catch (error) {
+			console.log(error);
+			return error as string;
+		}
+	};
+	const [state, signInAction, isPendding] = useActionState(
+		signInHandler,
+		"null",
+	);
 	return (
 		<SignUpContainer direction="column" justifyContent="space-between">
 			<CustomCard variant="outlined">
@@ -32,7 +62,8 @@ export default function SignInForm() {
 				</Typography>
 				<Box
 					component="form"
-					sx={{ display: "flex", flexDirection: "column", gap: 2 }}
+					sx={{ display: "flex", flexDirection: "column", gap: 3 }}
+					action={signInAction}
 				>
 					<FormControl>
 						<FormLabel htmlFor="email">Email</FormLabel>
@@ -41,30 +72,56 @@ export default function SignInForm() {
 							fullWidth
 							id="email"
 							placeholder="your@email.com"
-							name="email"
 							autoComplete="email"
 							variant="outlined"
+							{...register("email")}
+							sx={{
+								"& .MuiOutlinedInput-root": {
+									height: "45px",
+								},
+								"& .MuiFormHelperText-root": {
+									fontSize: "0.8rem", // Adjust font size
+									color: "red", // Change the text color (or any color of your choice)
+									marginTop: "5px", // Adjust margin for spacing between the input and helper text
+								},
+							}}
+							helperText={errors.email?.message}
 						/>
 					</FormControl>
+
 					<FormControl>
 						<FormLabel htmlFor="password">Password</FormLabel>
 						<TextField
 							required
 							fullWidth
-							name="password"
-							placeholder="••••••"
 							type="password"
 							id="password"
-							autoComplete="new-password"
 							variant="outlined"
+							{...register("password")}
+							sx={{
+								"& .MuiOutlinedInput-root": {
+									height: "45px",
+								},
+								"& .MuiFormHelperText-root": {
+									fontSize: "0.8rem", // Adjust font size
+									color: "red", // Change the text color (or any color of your choice)
+									marginTop: "5px", // Adjust margin for spacing between the input and helper text
+								},
+							}}
+							helperText={errors.password?.message}
 						/>
 					</FormControl>
 					<FormControlLabel
 						control={<Checkbox value="allowExtraEmails" color="primary" />}
 						label="I want to receive updates via email."
 					/>
-					<Button type="submit" fullWidth variant="contained">
-						Sign up
+					<Button
+						type="submit"
+						disabled={!isValid}
+						fullWidth
+						variant="contained"
+					>
+						Sign in
 					</Button>
 				</Box>
 				<Divider>
@@ -74,9 +131,7 @@ export default function SignInForm() {
 					<Button fullWidth variant="outlined">
 						Sign up with Google
 					</Button>
-					<Button fullWidth variant="outlined">
-						Sign up with Facebook
-					</Button>
+
 					<Typography sx={{ textAlign: "center" }}>
 						Already have an account?{" "}
 						<Link
