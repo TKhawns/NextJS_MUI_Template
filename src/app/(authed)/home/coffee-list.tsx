@@ -3,8 +3,8 @@
 import { Box } from "@mui/material";
 import Grid from "@mui/material/Grid2";
 import { useSuspenseQuery } from "@tanstack/react-query";
-import { Suspense } from "react";
-import { getAllCoffeeList } from "./actions/get-all-coffee";
+import { Suspense, useEffect } from "react";
+import { getAllCoffeeList, getAllProductList } from "./actions/get-all-coffee";
 import CoffeeItem from "./components/coffee-item";
 import Loading from "./loading";
 
@@ -13,8 +13,16 @@ function CoffeeList() {
 		queryKey: ["coffee"],
 		queryFn: () => getAllCoffeeList(),
 	});
+	const { data: productData, isLoading: productLoading } = useSuspenseQuery({
+		queryKey: ["products"],
+		queryFn: () => getAllProductList(),
+	});
 
 	if (coffeeData === undefined) return <Loading />;
+
+	useEffect(() => {
+		console.log(productData);
+	}, []);
 
 	return (
 		<Box

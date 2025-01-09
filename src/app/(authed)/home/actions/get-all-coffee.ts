@@ -1,5 +1,6 @@
 "use server";
 
+import { axios } from "@/configs/axios.config";
 import { CoffeeType } from "@/lib/types";
 
 // Example API.
@@ -14,10 +15,22 @@ export const getAllCoffeeList = async () => {
 		});
 
 		const res = await response.json();
-		console.log("Test response from network api: ", res);
-		console.log(res);
+		// console.log("Test response from network api: ", res);
 		return res as CoffeeType[];
 	} catch (error) {
 		console.log(error);
+	}
+};
+
+export const getAllProductList = async () => {
+	try {
+		const response = await axios.get("/user/product-list");
+
+		const res = await response.data;
+		console.log("Test products from network api: ", res);
+		return res;
+	} catch (error) {
+		console.log(error);
+		return null;
 	}
 };

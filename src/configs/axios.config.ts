@@ -1,68 +1,85 @@
+import { refreshToken } from "@/lib/actions/refresh-token";
 import Axios from "axios";
 import { cookies } from "next/headers";
-import { AppConfig } from "./app.config";
+import { AppConfig } from "./config";
 
 const axios = Axios.create({
 	baseURL: AppConfig.apiBase,
 	withCredentials: true,
 });
 
-// Prevent multiple call renew API.
+// Prevent multiple calls to renew the API.
 let isRefreshing = false;
-// Stack store list requests is waiting access_token.
+// Stack to store requests waiting for the new access token.
 let refreshSubscribers: ((token: string) => void)[] = [];
 
-// Request interceptor to add token to request headers
+// Function to notify all subscribers with the new access token.
+const onAccessTokenRefreshed = (newAccessToken: string) => {
+	refreshSubscribers.forEach((callback) => callback(newAccessToken));
+	refreshSubscribers = [];
+};
+
+// Function to add subscribers waiting for the new token.
+const addRefreshSubscriber = (callback: (token: string) => void) => {
+	refreshSubscribers.push(callback);
+};
+
+// Request interceptor to add token to request headers.
 axios.interceptors.request.use(
 	async (config) => {
-		// TODO: pass the token to header auth.
-		const accessToken = (await cookies()).get("access_token")?.value.toString();
+		const cookieStore = await cookies();
+		const accessToken = cookieStore.get("access_token")?.value?.toString();
 		if (accessToken) {
 			config.headers.Authorization = `Bearer ${accessToken}`;
 		}
 		return config;
 	},
-	(error) => Promise.reject(error),
+	(error) => {
+		console.log("DEBUG: error from axios config token.");
+		Promise.reject(error);
+	},
 );
 
-// Response interceptor intercepting 401 responses, refreshing token and retrying the request
+// Response interceptor to handle 401 errors.
 axios.interceptors.response.use(
 	(response) => response,
-	// If 401 authen error.
 	async (error) => {
 		const originalRequest = error.config;
-		// Wait for exist renew access_token from other.
+
+		// Check if error is due to 401 and the request hasn't already been retried.
 		if (isRefreshing) {
+			// Wait for the token to be refreshed.
 			return new Promise((resolve, reject) => {
-				refreshSubscribers.push((access_token: string) => {
-					originalRequest.headers.Authorization = `Bearer ${access_token}`;
+				addRefreshSubscriber((newAccessToken: string) => {
+					originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
 					resolve(axios(originalRequest));
 				});
 			});
 		}
 
-		// Renew token if no-one is renewing.
 		isRefreshing = true;
-		try {
-			// Get new access token using refresh token.
-			const refreshToken = (await cookies())
-				.get("refresh_token")
-				?.value.toString();
-			const response = await axios.post("/api/auth/refresh", {
-				refreshToken: refreshToken,
-			});
-			const newAccessToken = response.data.access_token;
 
-			// Call fail and original requests in stack.
-			refreshSubscribers.forEach((callback) => callback(newAccessToken));
-			refreshSubscribers = [];
+		try {
+			// Change to server action.
+			const newAccessToken = await refreshToken();
+
+			// Notify all waiting subscribers with the new token.
+			onAccessTokenRefreshed(newAccessToken);
+
 			isRefreshing = false;
 
+			// Retry the original request with the new token.
 			originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
 			return axios(originalRequest);
 		} catch (refreshError) {
 			isRefreshing = false;
 			refreshSubscribers = [];
+
+			// Reject all queued requests.
+			refreshSubscribers.forEach(async (callback) =>
+				callback(await Promise.reject(refreshError)),
+			);
+
 			return Promise.reject(refreshError);
 		}
 	},

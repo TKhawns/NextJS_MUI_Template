@@ -1,8 +1,8 @@
+import { getQueryClient } from "@/app/get-query-client";
 import { dehydrate } from "@tanstack/react-query";
 import { HydrationBoundary } from "@tanstack/react-query";
 import React from "react";
-import { getQueryClient } from "../get-query-client";
-import { getAllCoffeeList } from "./actions/get-all-coffee";
+import { getAllCoffeeList, getAllProductList } from "./actions/get-all-coffee";
 import CoffeeList from "./coffee-list";
 
 export default function Home() {
@@ -13,8 +13,17 @@ export default function Home() {
 			queryKey: ["coffee"],
 			queryFn: async () => {
 				const coffeeData = await getAllCoffeeList();
-				console.log("Coffee response:", coffeeData); // Debug log
+				// console.log("Coffee response:", coffeeData); // Debug log
 				return coffeeData;
+			},
+		});
+
+		queryClient.prefetchQuery({
+			queryKey: ["products"],
+			queryFn: async () => {
+				const productData = await getAllProductList();
+				console.log("Product response:", productData); // Debug log
+				return productData;
 			},
 		});
 	} catch (e) {

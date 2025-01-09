@@ -1,6 +1,7 @@
 "use server";
 
 import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
 import { axios } from "../../../configs/axios.config";
 
 // Sign up action with example api.
@@ -17,10 +18,13 @@ export const signIn = async (email: string, password: string) => {
 		cookieStore.set("refresh_token", response.data.refreshToken, {
 			httpOnly: true,
 		});
-
-		console.log(response.data);
+		console.log("DATA", response.data);
+		// console.log(response.headers);
 		return response.data;
 	} catch (error) {
 		console.log(error);
+		return error;
+	} finally {
+		redirect("/home");
 	}
 };

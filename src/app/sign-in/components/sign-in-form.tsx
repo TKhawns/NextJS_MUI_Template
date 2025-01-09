@@ -8,6 +8,7 @@ import {
 	Link,
 } from "@mui/material";
 
+import { inputStyle } from "@/constants";
 import { SignInSchema, SignInSchemaType } from "@/lib/validations/app-schema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
@@ -17,6 +18,7 @@ import {
 	TextField,
 	Typography,
 } from "@mui/material";
+import { redirect } from "next/navigation";
 import { useActionState } from "react";
 import { useForm } from "react-hook-form";
 import { signIn } from "../actions/sign-in";
@@ -40,6 +42,8 @@ export default function SignInForm() {
 				password: formData.get("password") as string,
 			};
 			const res = await signIn(data.email, data.password);
+			console.log("test response:", res);
+
 			return res;
 		} catch (error) {
 			console.log(error);
@@ -69,12 +73,14 @@ export default function SignInForm() {
 						<FormLabel htmlFor="email">Email</FormLabel>
 						<TextField
 							required
-							fullWidth
 							id="email"
 							placeholder="your@email.com"
-							autoComplete="email"
-							variant="outlined"
 							{...register("email")}
+							slotProps={{
+								htmlInput: {
+									style: inputStyle,
+								},
+							}}
 							sx={{
 								"& .MuiOutlinedInput-root": {
 									height: "45px",
@@ -82,7 +88,11 @@ export default function SignInForm() {
 								"& .MuiFormHelperText-root": {
 									fontSize: "0.8rem", // Adjust font size
 									color: "red", // Change the text color (or any color of your choice)
-									marginTop: "5px", // Adjust margin for spacing between the input and helper text
+								},
+								"&:-webkit-autofill": {
+									WebkitBoxShadow: "none !important",
+									WebkitTextFillColor: "inherit",
+									caretColor: "inherit",
 								},
 							}}
 							helperText={errors.email?.message}
@@ -93,10 +103,9 @@ export default function SignInForm() {
 						<FormLabel htmlFor="password">Password</FormLabel>
 						<TextField
 							required
-							fullWidth
 							type="password"
 							id="password"
-							variant="outlined"
+							placeholder="........."
 							{...register("password")}
 							sx={{
 								"& .MuiOutlinedInput-root": {
@@ -105,7 +114,6 @@ export default function SignInForm() {
 								"& .MuiFormHelperText-root": {
 									fontSize: "0.8rem", // Adjust font size
 									color: "red", // Change the text color (or any color of your choice)
-									marginTop: "5px", // Adjust margin for spacing between the input and helper text
 								},
 							}}
 							helperText={errors.password?.message}
@@ -121,7 +129,7 @@ export default function SignInForm() {
 						fullWidth
 						variant="contained"
 					>
-						Sign in
+						{isPendding ? "Signing" : "Sign in"}
 					</Button>
 				</Box>
 				<Divider>
