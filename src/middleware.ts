@@ -29,6 +29,7 @@ export default async function authMiddleware(request: NextRequest) {
 	if (!accessToken && !refreshToken) {
 		return NextResponse.redirect(new URL("/sign-in", request.url));
 	}
+	// Handle if access token or refresh token is changed by client browser.
 
 	// It will be called 1 time though many APIs in this screen.
 	if (!accessToken) {

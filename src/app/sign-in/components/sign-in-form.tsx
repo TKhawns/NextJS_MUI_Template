@@ -46,7 +46,7 @@ export default function SignInForm() {
 
 		if (response.statusCode) {
 			toast.error(response.message);
-			return {};
+			return data;
 		} else {
 			router.replace("/example");
 		}
@@ -76,6 +76,7 @@ export default function SignInForm() {
 							id="email"
 							placeholder="your@email.com"
 							{...register("email")}
+							defaultValue={state.email || ""}
 							slotProps={{
 								htmlInput: {
 									style: inputStyle,
@@ -106,6 +107,7 @@ export default function SignInForm() {
 							type="password"
 							id="password"
 							placeholder="..........."
+							defaultValue={state.password || ""}
 							{...register("password")}
 							sx={{
 								"& .MuiOutlinedInput-root": {
