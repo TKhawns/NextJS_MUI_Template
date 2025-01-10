@@ -48,7 +48,7 @@ export default function SignInForm() {
 			toast.error(response.message);
 			return {};
 		} else {
-			router.replace("/home");
+			router.replace("/example");
 		}
 		return response;
 	};
