@@ -4,6 +4,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import theme from "../theme";
 import "../constants/global-styles/globals.css";
+import { Toaster } from "sonner";
 import Providers from "./providers";
 
 const geistSans = Geist({
@@ -27,15 +28,17 @@ export default function RootLayout({
 	children: React.ReactNode;
 }>) {
 	return (
-		<html lang="en">
+		<html lang="en" suppressHydrationWarning>
 			<body className={`${geistSans.variable} ${geistMono.variable}`}>
 				{/* Must wrap providers of react-query. */}
 				<Providers>
-					{/* Enable this to custom override MUI components. */}
+					{/* Enable this to custom and override MUI components. */}
 					<AppRouterCacheProvider options={{ enableCssLayer: false }}>
 						<ThemeProvider theme={theme}>{children}</ThemeProvider>
 					</AppRouterCacheProvider>
 				</Providers>
+				{/* Remove this by other notification component. */}
+				<Toaster position="top-left" />
 			</body>
 		</html>
 	);

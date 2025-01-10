@@ -18,14 +18,16 @@ import {
 	TextField,
 	Typography,
 } from "@mui/material";
-import { redirect } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useActionState } from "react";
 import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 import { signIn } from "../actions/sign-in";
 import { CustomCard } from "./custom-card";
 import { SignUpContainer } from "./sign-in-container";
 
 export default function SignInForm() {
+	const router = useRouter();
 	// Example of react-hook-form validate sign-in fields.
 	const {
 		register,
@@ -35,25 +37,23 @@ export default function SignInForm() {
 		mode: "all",
 	});
 
-	const signInHandler = async (_previousState: string, formData: FormData) => {
-		try {
-			const data = {
-				email: formData.get("email") as string,
-				password: formData.get("password") as string,
-			};
-			const res = await signIn(data.email, data.password);
-			console.log("test response:", res);
+	const signInHandler = async (_previousState: {}, formData: FormData) => {
+		const data = {
+			email: formData.get("email") as string,
+			password: formData.get("password") as string,
+		};
+		const response = await signIn(data.email, data.password);
 
-			return res;
-		} catch (error) {
-			console.log(error);
-			return error as string;
+		if (response.statusCode) {
+			toast.error(response.message);
+			return {};
+		} else {
+			router.replace("/home");
 		}
+		return response;
 	};
-	const [state, signInAction, isPendding] = useActionState(
-		signInHandler,
-		"null",
-	);
+
+	const [state, signInAction, isPendding] = useActionState(signInHandler, {});
 	return (
 		<SignUpContainer direction="column" justifyContent="space-between">
 			<CustomCard variant="outlined">
@@ -105,7 +105,7 @@ export default function SignInForm() {
 							required
 							type="password"
 							id="password"
-							placeholder="........."
+							placeholder="..........."
 							{...register("password")}
 							sx={{
 								"& .MuiOutlinedInput-root": {

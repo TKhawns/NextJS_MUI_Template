@@ -8,7 +8,8 @@
 #### 	Initial features: 
 - Config with Material UI and react-query (Streaming with server components).
 - Validate with zod and react-hook-form.
-- Auto refresh the expired access token with axios.
+- Auto refresh the expired access token with Next middleware and cookie.
 - Format code by biomeJS.
+- Using Sonner notification component.
 #### Project structure:
 update...
